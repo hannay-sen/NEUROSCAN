@@ -1,0 +1,15 @@
+# Curated knowledge base: list 20-30 trusted documents here, then run
+#   python -m neuroscan.rag.ingest --reset
+#
+# Put each document's text in knowledge_base/sources/ (.txt, .md or .pdf).
+# Prefer sources you are allowed to copy, such as U.S. government pages
+# (e.g. National Cancer Institute PDQ summaries on adult brain tumors, pituitary tumors).
+# `topics` limits retrieval to the matching predicted class: glioma, meningioma, pituitary.
+#
+# Example: delete the `[]` line at the bottom, then add entries like this:
+# - id: nci_adult_cns_tumors
+#   title: "Adult Central Nervous System Tumors Treatment (PDQ) - Patient Version"
+#   url: "https://www.cancer.gov/types/brain/patient/adult-brain-treatment-pdq"
+#   file: sources/nci_adult_cns_tumors.txt
+#   topics: [glioma, meningioma]
+[]
