@@ -1,0 +1,74 @@
+# NeuroScan Agent: all settings and thresholds live here.
+# Research prototype for decision support only. Not for clinical diagnosis.
+
+classes: [glioma, meningioma, notumor, pituitary]   # Kaggle folder names, alphabetical
+no_tumor_class: notumor
+seed: 42
+device: auto            # auto | cpu | cuda
+
+paths:
+  kaggle_raw: data/raw/kaggle          # Training/<class>/*.jpg, Testing/<class>/*.jpg
+  figshare_raw: data/raw/figshare      # *.mat files (Cheng et al.)
+  figshare_out: data/processed/figshare
+  splits: data/splits
+  checkpoints: checkpoints
+  results: results
+  knowledge_base: knowledge_base
+  chroma_dir: knowledge_base/chroma
+  feedback: feedback/feedback.csv
+
+dedup:
+  hash_size: 16         # 16x16 dHash = 256 bits
+  max_hamming: 12       # pairs at or below this distance are treated as duplicates
+                        # (check data/splits/dedup_pairs.csv; lower it if you see false matches)
+
+splits:
+  kaggle_val_frac: 0.15
+  figshare_val_frac: 0.15
+  figshare_test_frac: 0.15
+
+classifier:
+  model_name: efficientnet_b0
+  pretrained: true      # ImageNet weights (downloaded by timm on first training run)
+  image_size: 224
+  drop_rate: 0.3
+  epochs: 15
+  batch_size: 32
+  lr: 0.0003
+  weight_decay: 0.0001
+  balance: weighted     # weighted | none   (CLI --balance overrides)
+  mc_samples: 20        # MC-dropout forward passes at inference
+  num_workers: 2
+
+segmentation:
+  image_size: 256
+  channels: [16, 32, 64, 128, 256]
+  strides: [2, 2, 2, 2]
+  num_res_units: 2
+  epochs: 40
+  batch_size: 16
+  lr: 0.001
+  mask_threshold: 0.5
+  num_workers: 2
+
+safety:
+  min_confidence: 0.60          # calibrated max probability below this -> low_confidence
+  max_entropy: 0.50             # normalized MC-dropout entropy (0..1) above this -> high_uncertainty
+  ood_percentile: 99            # Mahalanobis threshold = this percentile of validation scores
+  min_cam_in_mask: 0.30         # share of Grad-CAM energy inside the dilated mask
+  mask_dilation_px: 10
+  min_mask_area_pct: 0.10       # masks smaller than this (% of brain) count as "no mask"
+  max_removed_fraction: 0.25    # explanation_poorly_grounded above this
+
+rag:
+  collection: neuroscan_kb
+  chunk_chars: 800
+  chunk_overlap: 120
+  top_k: 4
+
+llm:
+  provider: auto                # auto | anthropic | openai | none
+  anthropic_model: claude-sonnet-5-5
+  openai_model: gpt-4o-mini
+  max_tokens: 500
+  temperature: 0.0
